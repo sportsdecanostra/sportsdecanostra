@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports de ca nostra - Diari Esportiu Tradicional</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        news: {
+                            dark: '#111111',
+                            paper: '#fcfcfc',
+                            muted: '#666666',
+                            border: '#e5e5e5',
+                            accent: '#8b0000'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f9fa; color: #1a1a1a; }
+        .font-headline { font-family: 'Playfair Display', Georgia, serif; }
+        .newspaper-border { border-top: 3px double #1a1a1a; border-bottom: 1px solid #1a1a1a; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-black selection:text-white">
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <!-- CLASSIC TOP BAR -->
+    <div class="bg-black text-white text-xs py-2 px-4 border-b border-neutral-800">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div id="current-date-display" class="font-medium tracking-wide text-neutral-300">
+                <!-- Fecha actual -->
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-neutral-300 font-medium">
+                <span><i class="fa-solid fa-envelope mr-1"></i> sportsdecanostra@gmail.com</span>
+                <span class="hidden sm:inline">·</span>
+                <button onclick="openAboutModal()" class="hover:text-white underline decoration-neutral-500 underline-offset-4 transition-colors">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Quiénes somos
+                </button>
+                <span class="hidden sm:inline">·</span>
+                <button onclick="requestAdminAccess()" class="hover:text-white underline decoration-neutral-500 underline-offset-4 transition-colors font-bold text-neutral-400">
+                    <i class="fa-solid fa-lock mr-1"></i> Acceso Redacción
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLASSIC NEWSPAPER HEADER -->
+    <header class="bg-white border-b border-news-border shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center space-y-3">
+            <div class="text-xs uppercase tracking-[0.3em] text-news-muted font-semibold">
+                Publicación periódica independiente de información deportiva local
+            </div>
+            <h1 onclick="switchTab('home')" class="font-headline text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-neutral-900 cursor-pointer hover:opacity-90 transition-opacity">
+                Sports de ca nostra
+            </h1>
+            <div class="text-xs uppercase tracking-widest text-news-accent font-bold pt-1">
+                Crónicas, resultados y análisis deportivo · Edición Digital
+            </div>
+        </div>
+
+        <!-- NAVIGATION BAR -->
+        <nav class="newspaper-border bg-white sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-12 overflow-x-auto">
+                <div class="flex items-center gap-1 sm:gap-6 text-sm font-bold uppercase tracking-wider whitespace-nowrap">
+                    <button onclick="switchTab('home')" id="nav-home" class="nav-btn py-3 px-3 border-b-2 border-black text-black transition-all">
+                        Inicio
+                    </button>
+                    <button onclick="switchTab('news')" id="nav-news" class="nav-btn py-3 px-3 border-b-2 border-transparent text-neutral-600 hover:text-black transition-all">
+                        Noticias & Artículos
+                    </button>
+                    <button onclick="switchTab('scores')" id="nav-scores" class="nav-btn py-3 px-3 border-b-2 border-transparent text-neutral-600 hover:text-black transition-all">
+                        Resultados
+                    </button>
+                    <button onclick="requestAdminAccess()" id="nav-admin" class="nav-btn hidden py-3 px-3 border-b-2 border-transparent text-news-accent hover:opacity-80 transition-all font-black">
+                        <i class="fa-solid fa-pen-to-square mr-1"></i> Gestionar Contenidos
+                    </button>
+                </div>
+                <div id="admin-quick-btn" class="hidden items-center gap-3">
+                    <button onclick="openCreateModal('news')" class="bg-black hover:bg-neutral-800 text-white px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wider transition-all">
+                        <i class="fa-solid fa-plus mr-1"></i> Nueva Noticia
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- PRESENTATION VIDEO SECTION -->
+        <section id="section-presentation-video" class="bg-white border border-news-border p-6 sm:p-8 rounded-xl shadow-sm">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- Columna izquierda: Información editorial del vídeo -->
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 bg-news-accent rounded-full animate-pulse"></span>
+                        <span class="text-xs font-bold uppercase tracking-widest text-news-accent">Editorial Multimedia</span>
+                    </div>
+                    <h2 class="font-headline text-2xl sm:text-3xl font-black text-neutral-900 leading-tight">
+                        Presentación Oficial: Sports de ca nostra
+                    </h2>
+                    <p class="text-sm sm:text-base text-neutral-700 leading-relaxed">
+                        Bienvenido a la edición digital de <strong>Sports de ca nostra</strong>. En este boletín audiovisual te explicamos el propósito de nuestra plataforma: acercar las crónicas deportivas locales, los marcadores en tiempo real y el seguimiento de nuestros equipos de forma cercana, rigurosa e independiente.
+                    </p>
+                    <div class="bg-neutral-50 border-l-4 border-black p-4 rounded-r text-xs text-neutral-600 space-y-1">
+                        <p class="font-bold text-neutral-900 uppercase tracking-wider"><i class="fa-solid fa-microphone-lines mr-1.5"></i> Boletín en Vídeo</p>
+                        <p>Presentación grabada desde redacción para la edición especial del Centenario de la FFIB.</p>
+                    </div>
+                </div>
+
+                <!-- Columna derecha: Reproductor vertical estilizado -->
+                <div class="lg:col-span-5 flex flex-col items-center">
+                    <div id="video-wrapper" class="w-full max-w-[280px] sm:max-w-[310px] aspect-[9/16] bg-neutral-950 rounded-2xl overflow-hidden shadow-xl border-4 border-neutral-900 relative flex items-center justify-center">
+                        <iframe src="https://drive.google.com/file/d/1Iq_-owtXoJAUXAkGmwQLshmM1GJvO_gF/preview" class="w-full h-full border-0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                    </div>
+                    <div class="mt-2.5 flex flex-col items-center gap-1">
+                        <span class="text-[11px] font-mono text-news-muted">
+                            Presentación Audiovisual &bull; Sports de ca nostra
+                        </span>
+                        <a href="https://drive.google.com/file/d/1Iq_-owtXoJAUXAkGmwQLshmM1GJvO_gF/view?usp=sharing" target="_blank" rel="noopener noreferrer" class="text-[11px] font-bold text-news-accent hover:underline">
+                            <i class="fa-solid fa-up-right-from-square mr-1"></i> Abrir vídeo en pantalla completa
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 1: HOME (Front Page) -->
+        <section id="tab-home" class="tab-content space-y-10">
+            <div id="lead-article-container" class="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-10 border-b border-news-border">
+                <!-- Carga dinámica -->
+            </div>
+
+            <div class="space-y-4">
+                <div class="border-b-2 border-black pb-2 flex items-center justify-between">
+                    <h3 class="font-headline text-xl font-bold uppercase tracking-wide">Otros Titulares Destacados</h3>
+                    <button onclick="switchTab('news')" class="text-xs font-bold uppercase tracking-wider text-news-accent hover:underline">
+                        Ver todos <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </button>
+                </div>
+                <div id="home-secondary-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Carga dinámica -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: NEWS & ARTICLES -->
+        <section id="tab-news" class="tab-content hidden space-y-8">
+            <div class="bg-white border border-news-border p-6 rounded-xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="font-headline text-2xl font-bold">Archivo de Noticias y Crónicas</h2>
+                    <p class="text-sm text-news-muted">Busca por palabra clave o filtra por categoría deportiva.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <input type="text" id="news-search" oninput="renderNews()" placeholder="Buscar título..." class="bg-neutral-50 border border-news-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-black">
+                    <select id="news-cat-filter" onchange="renderNews()" class="bg-neutral-50 border border-news-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-black">
+                        <option value="Todas">Todas las categorías</option>
+                        <option value="Fútbol">Fútbol</option>
+                        <option value="Baloncesto">Baloncesto</option>
+                        <option value="Tenis">Tenis</option>
+                        <option value="Ciclismo">Ciclismo</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="full-news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Carga dinámica -->
+            </div>
+        </section>
+
+        <!-- TAB 3: SCORES & RESULTS -->
+        <section id="tab-scores" class="tab-content hidden space-y-8">
+            <div class="bg-white border border-news-border p-6 rounded-xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="font-headline text-2xl font-bold">Resultados y Marcadores</h2>
+                    <p class="text-sm text-news-muted">Marcadores actualizados de la jornada deportiva.</p>
+                </div>
+                <button id="scores-create-btn" onclick="openCreateModal('score')" class="hidden bg-black hover:bg-neutral-800 text-white px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all self-start">
+                    <i class="fa-solid fa-plus mr-1"></i> Registrar Resultado
+                </button>
+            </div>
+
+            <div id="full-scores-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Carga dinámica -->
+            </div>
+        </section>
+
+        <!-- TAB 4: ADMIN / CMS PANEL -->
+        <section id="tab-admin" class="tab-content hidden space-y-8">
+            <div class="bg-white border border-news-border p-6 sm:p-8 rounded-xl shadow-sm space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-news-border">
+                    <div>
+                        <h2 class="font-headline text-2xl font-bold">Panel de Administración de Contenidos (CMS)</h2>
+                        <p class="text-sm text-news-muted">Añade, edita o elimina noticias y resultados. Los cambios se guardan automáticamente en tu navegador.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button onclick="openCreateModal('news')" class="bg-black hover:bg-neutral-800 text-white px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all">
+                            <i class="fa-solid fa-newspaper mr-1.5"></i> Nueva Noticia
+                        </button>
+                        <button onclick="openCreateModal('score')" class="bg-neutral-200 hover:bg-neutral-300 text-neutral-900 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all">
+                            <i class="fa-solid fa-futbol mr-1.5"></i> Nuevo Resultado
+                        </button>
+                        <button onclick="resetToOfficialEdition()" class="bg-red-50 hover:bg-red-100 text-red-800 border border-red-200 px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all">
+                            <i class="fa-solid fa-rotate-left mr-1.5"></i> Restaurar Edición Oficial
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submenú CMS -->
+                <div class="flex gap-2 border-b border-news-border pb-4">
+                    <button onclick="switchAdminSub('news')" id="admin-sub-news-btn" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all bg-black text-white">
+                        Noticias (<span id="admin-news-count">0</span>)
+                    </button>
+                    <button onclick="switchAdminSub('scores')" id="admin-sub-scores-btn" class="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all bg-neutral-100 text-neutral-700 hover:bg-neutral-200">
+                        Resultados (<span id="admin-scores-count">0</span>)
+                    </button>
+                </div>
+
+                <!-- Listados -->
+                <div id="admin-sec-news" class="space-y-3">
+                    <div id="admin-news-list" class="space-y-3"></div>
+                </div>
+                <div id="admin-sec-scores" class="space-y-3 hidden">
+                    <div id="admin-scores-list" class="space-y-3"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-news-border mt-20 py-12 text-sm text-news-muted">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+            <div>
+                <span class="font-headline font-bold text-neutral-900 text-base">SPORTS DE CA NOSTRA</span>
+                <p class="text-xs mt-1">Trabajo académico interactivo - Diario Deportivo Digital</p>
+            </div>
+            <div class="flex flex-wrap justify-center items-center gap-6 text-xs font-bold uppercase tracking-wider">
+                <button onclick="switchTab('home')" class="hover:text-black">Inicio</button>
+                <button onclick="switchTab('news')" class="hover:text-black">Noticias</button>
+                <button onclick="switchTab('scores')" class="hover:text-black">Resultados</button>
+                <button onclick="openAboutModal()" class="hover:text-black">Quiénes somos</button>
+                <button onclick="requestAdminAccess()" class="hover:text-black text-neutral-400"><i class="fa-solid fa-lock mr-1"></i> Redacción</button>
+            </div>
+            <div class="text-xs text-neutral-500 font-mono">
+                sportsdecanostra@gmail.com
+            </div>
+        </div>
+    </footer>
+
+    <!-- MODAL QUIÉNES SOMOS -->
+    <div id="about-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white border border-neutral-300 rounded-xl max-w-lg w-full p-6 sm:p-8 space-y-6 relative shadow-2xl">
+            <button onclick="closeAboutModal()" class="absolute top-6 right-6 w-8 h-8 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center transition-all">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-xs uppercase font-bold text-news-accent tracking-widest">Sobre Nosotros</div>
+            <h3 class="font-headline text-2xl font-bold text-neutral-900">Sports de ca nostra</h3>
+            <p class="text-neutral-700 text-sm leading-relaxed">
+                <strong>Sports de ca nostra</strong> és un mitjà digital independent creat per cobrir tota l'actualitat esportiva local, comarcal i de les nostres illes. Neix amb la vocació d'apropar les cròniques, els resultats i les històries humanes de cada equip i esportista al nostre lector.
+            </p>
+            <p class="text-neutral-700 text-sm leading-relaxed">
+                Pots posar-te en contacte amb la redacció per enviar cròniques, suggeriments o resultats a través del nostre correu electrònic oficial: <span class="font-mono font-bold text-black">sportsdecanostra@gmail.com</span>.
+            </p>
+            <div class="pt-4 flex justify-end">
+                <button onclick="closeAboutModal()" class="bg-black hover:bg-neutral-800 text-white font-bold px-5 py-2 rounded-lg text-xs uppercase tracking-wider">Entès</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMACIÓN PERSONALIZADO -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+        <div class="bg-white border border-neutral-300 rounded-xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+            <div class="flex items-center gap-3 text-red-800">
+                <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                <h3 class="font-headline text-lg font-bold text-neutral-900">Confirmar acción</h3>
+            </div>
+            <p id="confirm-modal-text" class="text-sm text-neutral-700 leading-relaxed">
+                ¿Estás seguro de que deseas continuar?
+            </p>
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button type="button" onclick="closeConfirmModal()" class="px-4 py-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold uppercase tracking-wider">
+                    Cancelar
+                </button>
+                <button type="button" id="confirm-modal-accept" class="px-4 py-2 rounded-lg bg-red-700 hover:bg-red-800 text-white text-xs font-bold uppercase tracking-wider">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PARA CREAR / EDITAR -->
+    <div id="content-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white border border-neutral-300 rounded-xl max-w-xl w-full p-6 sm:p-8 space-y-6 relative shadow-2xl my-8">
+            <div class="flex items-center justify-between pb-4 border-b border-news-border">
+                <h3 id="modal-heading" class="font-headline text-xl font-bold text-neutral-900">Añadir Contenido</h3>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="type-selector-container" class="grid grid-cols-2 gap-2 p-1 bg-neutral-100 rounded-lg">
+                <button type="button" onclick="setModalType('news')" id="sel-type-news" class="py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all bg-black text-white shadow-xs">
+                    Noticia / Crónica
+                </button>
+                <button type="button" onclick="setModalType('score')" id="sel-type-score" class="py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all text-neutral-600 hover:text-black">
+                    Resultado Deportivo
+                </button>
+            </div>
+
+            <!-- Formulario Noticia -->
+            <form id="modal-form-news" onsubmit="submitNewsForm(event)" class="space-y-4">
+                <input type="hidden" id="news-edit-id">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Título de la Noticia *</label>
+                    <input type="text" id="f-news-title" required placeholder="Ej: Triunfo histórico en el derbi comarcal..." class="w-full bg-neutral-50 border border-news-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-black">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Subtítulo *</label>
+                    <input type="text" id="f-news-subtitle" required placeholder="Ej: El conjunto local remontó un 0-2 en los últimos minutos..." class="w-full bg-neutral-50 border border-news-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-black font-semibold">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Categoría *</label>
+                        <select id="f-news-category" class="w-full bg-neutral-50 border border-news-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-black">
+                            <option value="Fútbol">Fútbol</option>
+                            <option value="Baloncesto">Baloncesto</option>
+                            <option value="Tenis">Tenis</option>
+                            <option value="Ciclismo">Ciclismo</option>
+                            <option value="Otros">Otros</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Autor *</label>
+                        <input type="text" id="f-news-author" required placeholder="Ej: Miquel Riera" class="w-full bg-neutral-50 border border-news-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-black">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">URL Imagen (Opcional)</label>
+                    <input type="url" id="f-news-image" placeholder="https://images.unsplash.com/photo-..." class="w-full bg-neutral-50 border border-news-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-black">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Crónica o Contenido *</label>
+                    <textarea id="f-news-content" rows="4" required placeholder="Escribe la crónica detallada aquí..." class="w-full bg-neutral-50 border border-news-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-black"></textarea>
+                </div>
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-news-border">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold uppercase tracking-wider">Cancelar</button>
+                    <button type="submit" id="news-submit-btn" class="px-5 py-2 rounded-lg bg-black hover:bg-neutral-800 text-white text-xs font-bold uppercase tracking-wider">Guardar Noticia</button>
+                </div>
+            </form>
+
+            <!-- Formulario Resultado -->
+            <form id="modal-form-score" onsubmit="submitScoreForm(event)" class="space-y-4 hidden">
+                <input type="hidden" id="score-edit-id">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Competición / Deporte *</label>
+                    <input type="text" id="f-score-sport" required placeholder="Ej: Fútbol - Regional Preferent" class="w-full bg-neutral-50 border border-news-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-black">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Equipo Local *</label>
+                        <input type="text" id="f-score-home" required placeholder="Ej: CE Ca Nostra" class="w-full bg-neutral-50 border border-news-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-black">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Equipo Visitante *</label>
+                        <input type="text" id="f-score-away" required placeholder="Ej: Penya Esportiva" class="w-full bg-neutral-50 border border-news-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-black">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Goles Local *</label>
+                        <input type="number" id="f-score-homegoals" min="0" required class="w-full bg-neutral-50 border border-news-border rounded-lg px-3 py-2.5 text-sm font-mono focus:outline-none focus:border-black">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Goles Visitante *</label>
+                        <input type="number" id="f-score-awaygoals" min="0" required class="w-full bg-neutral-50 border border-news-border rounded-lg px-3 py-2.5 text-sm font-mono focus:outline-none focus:border-black">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-neutral-700 mb-1">Estado *</label>
+                        <select id="f-score-status" class="w-full bg-neutral-50 border border-news-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-black">
+                            <option value="Finalizado">Finalizado (FT)</option>
+                            <option value="En Directo">En Directo (LIVE)</option>
+                            <option value="Próximamente">Próximamente</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-3 pt-3 border-t border-news-border">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold uppercase tracking-wider">Cancelar</button>
+                    <button type="submit" id="score-submit-btn" class="px-5 py-2 rounded-lg bg-black hover:bg-neutral-800 text-white text-xs font-bold uppercase tracking-wider">Guardar Resultado</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ACCESO PRIVADO REDACCIÓN -->
+    <div id="password-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
+        <div class="bg-white border border-neutral-300 rounded-xl max-w-sm w-full p-6 space-y-5 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-news-border pb-3">
+                <div class="flex items-center gap-2 text-neutral-900">
+                    <i class="fa-solid fa-shield-halved text-news-accent"></i>
+                    <h3 class="font-headline text-lg font-bold">Acceso Privado</h3>
+                </div>
+                <button onclick="closePasswordModal()" class="w-7 h-7 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form onsubmit="verifyAdminPassword(event)" class="space-y-4">
+                <p class="text-xs text-neutral-600">Introduce la clave de editor para desbloquear las herramientas de publicación y edición.</p>
+                <div>
+                    <input type="password" id="admin-pass-input" required placeholder="Contraseña de editor..." class="w-full bg-neutral-50 border border-news-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-black">
+                </div>
+                <div class="flex justify-end gap-2">
+                    <button type="button" onclick="closePasswordModal()" class="px-4 py-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold uppercase tracking-wider">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded-lg bg-black hover:bg-neutral-800 text-white text-xs font-bold uppercase tracking-wider">Entrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Fecha actual en castellano
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const todayStr = new Date().toLocaleDateString('es-ES', options);
+        document.getElementById('current-date-display').textContent = todayStr.charAt(0).toUpperCase() + todayStr.slice(1);
+
+        // Versión oficial de edición para sincronizar los datos en cualquier dispositivo
+        const EDITION_VERSION = 'v10_clean_news';
+        const ADMIN_SECRET = 'canostra2026';
+        // Enlace incrustable de Google Drive del vídeo de presentación
+        const VIDEO_EMBED_URL = 'https://drive.google.com/file/d/1Iq_-owtXoJAUXAkGmwQLshmM1GJvO_gF/preview';
+        let isAdminAuthenticated = false;
+        const defaultNews = [
+            {
+                id: 'n_atb_troya',
+                title: '"De camino al estadio vengo con la piel de gallina"',
+                subtitle: 'Oscar Troya, técnico del Atlético Baleares, atendió a los medios este pasado viernes con la mirada puesta en el playoff tras una victoria muy trabajada a domicilio ante el Elche llicitano',
+                category: 'Fútbol',
+                author: 'Redacción Sports de ca nostra',
+                date: '22 de noviembre de 2026',
+                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFmtqbiRuInxULCKkVseR5iQP0puFphXFhHeBZ7nkIcmhKUXLSB-LQHy0&s=10',
+                content: `El conjunto balearico se encuentra a dos puntos de la zona alta, una situación que parecía lejana tras el difícil arranque liguero. Esta semana recibe la visita de un Murcia Imperial sin rumbo.
+
+El entrenador del Atlético Baleares, Óscar Troya, se mostró satisfecho con el trabajo de sus jugadores durante toda la semana. El técnico no quiere volver a repetir el error de hace dos jornadas ante La Nucía, un equipo que llegaba al encuentro tras encadenar varias derrotas seguidas.
+
+<strong>Partido a partido</strong>
+
+<strong>"A mí las rachas a favor, en contra, las mías o las de los contrarios no me importan"</strong>, aseguró el técnico ante la prensa. Troya recordó aquel tropiezo en casa como aviso para su plantilla. <strong>"La Nucía venía en una racha negativa y nosotros no logramos puntuar ese día"</strong>, señaló Troya.
+
+El técnico balearico insistió en que mirar la tabla sería un fallo grave antes de recibir al conjunto grana. <strong>"Es un rival que, si vamos a la clasificación, nos vamos a equivocar"</strong>, advirtió.
+
+<strong>"Es un rival dinámico, con mucho desparpajo en los últimos metros"</strong>, apuntó Troya sobre las virtudes del adversario. También destacó la capacidad competitiva del Murcia Imperial, que la pasada jornada jugó muchos minutos con un hombre menos y tuvo opciones reales de empatar su partido. <strong>"Nos va a obligar a estar perfectos en lo que queremos, y queremos lograr esa perfección para poder ganar"</strong>, aseguró el antiguo entrenador del Poblense.
+
+<strong>La enfermería de cada vez más vacía</strong>
+
+En cuanto al número de bajas y altas, el vestuario recupera efectivos importantes para esta jornada. Tras el regreso de Martí Payeras la semana pasada, Alberto también está ya disponible para entrar en la lista. De este modo, sólo quedan fuera de la convocatoria Axel Bejarano por lesión y nadie por sanción.
+
+Troya contará con veinte futbolistas listos para competir este domingo. <strong>"Cuantos más seamos, más competencia interna y más exigencia habrá entre ellos; el beneficiado es el equipo"</strong>, valoró el míster.
+
+<strong>Hay que ganarse el puesto</strong>
+
+También hubo preguntas por la gestión de los minutos de jugadores que llevan tiempo parados, como Payeras o Alberto, el entrenador fue directo. <strong>"No la gestiono porque yo lo que quiero es ganar, y para ganar tengo que poner a los que mejor están"</strong>.
+
+Troya descartó planes de regreso inmediatos y puso como ejemplo el caso reciente de Hugo Anglada, quien pasó de jugar media hora tras su alta médica a disputar tres partidos completos seguidos. <strong>"Eso no se puede estructurar ni organizar, tendrán que ir cogiendo dinámica conforme la competición y los entrenamientos lo permitan"</strong>, añadió con rostro serio.
+
+<strong>No hay nadie indiscutible</strong>
+
+Otro nombre propio en la sala de prensa fue el de la principal figura de este Baleares, Florin Andone, que vuelve tras cumplir sanción. Aunque el delantero es una pieza clave, Troya quiso poner el foco en el grupo por encima de cualquier individualidad. <strong>"Nadie es tan bueno como todos juntos, no hay ningún individuo que esté por encima del resto"</strong>, intentando demostrar que el mejor equipo son todos los jugadores unidos.
+
+El entrenador insistió en que el éxito del Baleares pasa por el esfuerzo colectivo. <strong>"Somos buenos cuando todos sumamos, corremos, luchamos y tenemos el balón"</strong>, dijo, dejando en el aire si el atacante rumano partirá de inicio el domingo.
+
+Además, recordó que ganar en Elche no va a esconder los fallos del equipo. <strong>"Soy exigente, a mí no me engaña el resultado"</strong>, comentó Troya.
+
+El encuentro tendrá además un componente emotivo especial para la entidad. El club celebra su 106 aniversario y el Estadio Balear vivirá su primer partido tras la fecha histórica. Troya confesó lo que siente cada vez que acude al campo. <strong>"Vengo los domingos de casa en coche, unos veinte minutos, y vengo con la piel de gallina por lo que representa jugar en el Estadio Balear con nuestra gente"</strong>.
+
+El técnico agradeció el respaldo constante de la grada. <strong>"Ojalá podamos regalar una victoria y nuestra mejor versión para que los tres puntos se queden en casa"</strong>, concluyó el míster del Baleares.`
+            },
+            {
+                id: 'n_ffib_100',
+                title: '(Crónica) La Federación de Futbol de les Illes Balears celebra su centenario rompiendo records',
+                subtitle: 'Son Amar se vistió de gala este pasado viernes para acoger la gran fiesta anual del fútbol balear',
+                category: 'Fútbol',
+                author: 'Redacción Sports de ca nostra',
+                date: '22 de noviembre de 2026',
+                image: 'https://uh.gsstatic.es/deportes/futbol/2026/11/13/4848397/futbol-balear-celebra-gala-mas-especial.jpg',
+                content: `La gala de este año no se trataba de una ceremonia cualquiera, ya que se conmemoraban 100 años de historia de la Federació de Futbol de les Illes Balears (FFIB).
+
+La gala reunió a las principales autoridades políticas y deportivas de todas las islas para celebrar un siglo de una entidad importantísima para el deporte del archipiélago.
+
+La ceremonia arrancó con un respetuoso minuto de silencio en memoria de los miembros del fútbol balear fallecidos durante el último año. También se quiso homenajear a las víctimas de tragedias recientes y a figuras del deporte como Jesús de Miguel. Tras este inicio emotivo, Jaume Colombàs y Lluc Bonnín devolvieron la alegría y rescataron las risas del público enseguida.
+
+Récord histórico de "fichas"
+
+El presidente de la FFIB, Jordi Horrach, se mostró orgulloso y reconoció que el fútbol en las islas sigue rompiendo récords: "Hemos batido el récord de fichas en una sola temporada en toda la historia del fútbol balear". Asimismo, quiso agradecer las nuevas ayudas económicas y el esfuerzo por facilitar el trabajo de todos los clubes del archipiélago.
+
+Personalidades importantes en el evento
+
+La velada contó con la presencia de personas destacadas de la política en las Islas Baleares, como Marga Prohens y Jaume Bauzà. También estuvo presente la presidenta del Grup Serra, Carmen Serra, a pesar de estar envuelta en una polémica debido a la huelga de los trabajadores de su periódico Última Hora.
+
+Fue la misma Carmen Serra quien salió a dar un discurso inicial, destacando el papel de los deportistas de las islas como los mejores representantes de la comunidad autónoma. "Los deportistas de las Islas Baleares son los mejores influencers para nuestros jóvenes", dijo la empresaria mallorquina. También valoró la evolución del fútbol femenino en las Islas Baleares, con referentes como Patri Guijarro, Mariona Caldentey o Cata Coll, nominadas al Balón de Oro.
+
+Posteriormente, fue el turno de Marga Prohens, quien también quiso poner en valor el trabajo de la Federación de Fútbol de las Islas Baleares en relación con el fútbol femenino. El discurso de la presidenta del Govern se hizo un poco largo entre los asistentes, quienes comentaban al finalizar la gala que parecía más un mitin o discurso político que la intervención propia de una celebración de fútbol.
+
+Una mina de talento
+
+Después del discurso de la presidenta del Govern, se emitió desde las pantallas un vídeo recordando a los grandes futbolistas que han salido del archipiélago balear. Desde jugadores de la talla del internacional Marco Asensio hasta jóvenes promesas que ya despuntan en la élite, las islas demuestran ser una auténtica cuna de talentos.
+
+En el vídeo emitido aparece el presidente de la Federación, Jordi Horrach, agradeciendo a las personas que trabajan desde la sombra en cada club de las islas para que este camino hacia la cima fuera posible.
+
+Un discurso que llegó al alma
+
+El momento más emotivo y reflexivo llegó con el discurso de Jaume Bauzà, conseller de Turisme, Cultura i Esports, quien subió al escenario para entregar las medallas de oro a la trayectoria deportiva. Los galardonados fueron Jaume Ordinas Capó, Salvador Mateu Castell, Ricardo López Andújar y Catalina Vilanova, conocida como Sor Serafina, junto a Gabriel Servera.
+
+El conseller fue muy aplaudido tras pronunciar un discurso muy reflexivo. Bauzà hizo recordar a la gente que estas personas son el verdadero motor del fútbol. "Son los héroes anónimos que trabajan desde la sombra para que a los clubes nunca les falte de nada", comentó el conseller con total acierto, sin el esfuerzo diario de estas personas el fútbol actual no sería absolutamente nada de lo que es hoy en día.
+
+Leyendas del deporte balear como Marcos Martín de la Fuente recibieron el prestigioso premio Miquel Nadal en reconocimiento a su larga trayectoria en Primera División. Durante el homenaje se repasó su carrera en el fútbol profesional, recordando que es el segundo jugador balear con más partidos en la máxima categoría, con más de cuatrocientos encuentros a sus espaldas. Al recibir el galardón, se mostró muy agradecido con la Federación y rememoró los bonitos momentos que vivió en su etapa formativa dentro del fútbol base.
+
+La mejor del mundo es mallorquina
+
+Una de las mayores ovaciones de la noche fue para la flamante mejor portera del mundo, Cata Coll, consagrada con el prestigioso trofeo Lev Yashin. La mallorquina recibió la Medalla de Oro al Reconocimiento Deportivo junto a Andrea Alcaide, destacada futbolista de fútbol playa. La guardameta del FC Barcelona no pudo acudir en persona a la gala debido a compromisos deportivos, pero dejó un emotivo mensaje en vídeo. La mallorquina se mostró muy orgullosa de sus raíces, como es habitual, y confesó que sigue muy de cerca el fútbol balear. Posteriormente, agradeció su trayectoria a todos los clubes de las islas en los que había militado y tuvo un recuerdo muy especial para Pablo Roca, su entrenador de porteros desde los doce años.
+
+Orgullo centenario
+
+El CE Constància de Inca recibió el Premio Rafael Puelles en reconocimiento a la dilatada trayectoria de este club centenario. El Constància es uno de los clubes más míticos del deporte balear, siendo el segundo equipo de las islas en alcanzar el fútbol profesional tras militar en Segunda División durante los años cuarenta. Es uno de los clubes más queridos de Mallorca por su rica historia, su arraigo social y por consolidarse como el segundo equipo más importante de la comunidad autónoma, solo por detrás del Real Mallorca.
+
+También clubes históricos como la UE Alcúdia y el CE Campos consiguieron la Medalla FFIB, por cumplir su primer siglo de vida. Las encargadas de recibir tan distinguido galardón fueron la alcaldesa de Alcúdia, Fina Linares, y la presidenta del Govern, la campanetera Marga Prohens.
+
+Más allá de los grandes deportistas que han surgido de la comunidad autónoma, la FFIB se ha convertido en un auténtico orgullo para los de la tierra gracias a su gran apuesta por el compromiso social y la integración, proponiendo nuevas medidas para la inclusión y aprovechando que el fútbol es una gran herramienta para hacer de este mundo un lugar mejor.
+
+Entre las iniciativas, destaca la nueva academia inclusiva de la federación, un proyecto diseñado para eliminar barreras y asegurar que cualquier persona pueda disfrutar del fútbol. Este trabajo consiste en iniciativas como la escuela inclusiva, dirigida específicamente a niños con autismo, y la consolidación de la Lliga Insuperables, para garantizar que nadie se quede fuera de un deporte tan bonito como es el fútbol.
+
+Llegan pisando fuerte
+
+Finalmente, se quiso celebrar el presente y el futuro del fútbol balear a través de los Trofeos Mapfre Promesas y Futuro. Se homenajearon a jóvenes que ya despuntan con fuerza, como Adrià Català (Atlético Baleares), Rafel García (Poblense) y Sergi Pérez (Palma Futsal). También hubo un merecido reconocimiento para los jóvenes que han debutado recientemente en el fútbol profesional, como Miguel Calatayud (Mallorca), Luis Orejuela (Mallorca) y Javier Olaizola (Eldense), quienes se estrenaron en Primera División con el Real Mallorca la pasada temporada.`
+            }
+        ];
+
+        const defaultScores = [
+            {
+                id: 's1',
+                sport: 'Fútbol - Tercera Federación (Illes Balears)',
+                homeTeam: 'CE Constància',
+                awayTeam: 'UD Poblense',
+                homeGoals: 2,
+                awayGoals: 1,
+                status: 'Finalizado'
+            },
+            {
+                id: 's2',
+                sport: 'Baloncesto - Liga Comarcal',
+                homeTeam: 'Bàsquet Palma',
+                awayTeam: 'CE Ca Nostra B',
+                homeGoals: 65,
+                awayGoals: 72,
+                status: 'Finalizado'
+            }
+        ];
+
+        let newsList = [];
+        let scoresList = [];
+
+        try {
+            const savedVersion = localStorage.getItem('cdn_edition_version');
+            if (savedVersion !== EDITION_VERSION) {
+                newsList = [...defaultNews];
+                scoresList = [...defaultScores];
+                localStorage.setItem('cdn_edition_version', EDITION_VERSION);
+                localStorage.setItem('cdn_news', JSON.stringify(newsList));
+                localStorage.setItem('cdn_scores', JSON.stringify(scoresList));
+            } else {
+                newsList = JSON.parse(localStorage.getItem('cdn_news')) || [...defaultNews];
+                scoresList = JSON.parse(localStorage.getItem('cdn_scores')) || [...defaultScores];
+            }
+        } catch (e) {
+            newsList = [...defaultNews];
+            scoresList = [...defaultScores];
+        }
+
+        function persistData() {
+            try {
+                localStorage.setItem('cdn_edition_version', EDITION_VERSION);
+                localStorage.setItem('cdn_news', JSON.stringify(newsList));
+                localStorage.setItem('cdn_scores', JSON.stringify(scoresList));
+            } catch (e) {
+                console.warn('Almacenamiento local no disponible.');
+            }
+            updateStats();
+        }
+
+        function resetToOfficialEdition() {
+            openConfirmModal('¿Deseas restaurar las noticias y resultados oficiales originales de Sports de ca nostra?', () => {
+                newsList = [...defaultNews];
+                scoresList = [...defaultScores];
+                persistData();
+                renderAll();
+                showToast('Edición oficial restaurada correctamente.');
+            });
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto px-4 py-3 rounded-lg shadow-lg text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2 transition-all duration-300 ${type === 'success' ? 'bg-black border border-neutral-800' : 'bg-red-800'}`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} text-sm"></i> <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Gestión de Modal de Confirmación personalizado
+        let pendingConfirmAction = null;
+
+        function openConfirmModal(text, onConfirm) {
+            document.getElementById('confirm-modal-text').textContent = text;
+            pendingConfirmAction = onConfirm;
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirm-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            pendingConfirmAction = null;
+        }
+
+        document.getElementById('confirm-modal-accept').addEventListener('click', () => {
+            if (typeof pendingConfirmAction === 'function') {
+                pendingConfirmAction();
+            }
+            closeConfirmModal();
+        });
+
+        // Control de acceso protegido para el editor
+        function requestAdminAccess() {
+            if (isAdminAuthenticated) {
+                switchTab('admin');
+                return;
+            }
+            document.getElementById('admin-pass-input').value = '';
+            const modal = document.getElementById('password-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => document.getElementById('admin-pass-input').focus(), 100);
+        }
+
+        function closePasswordModal() {
+            const modal = document.getElementById('password-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function verifyAdminPassword(e) {
+            e.preventDefault();
+            const val = document.getElementById('admin-pass-input').value;
+            if (val === ADMIN_SECRET) {
+                isAdminAuthenticated = true;
+                closePasswordModal();
+                updateAdminVisibility();
+                switchTab('admin');
+                showToast('Modo editor desbloqueado');
+            } else {
+                showToast('Contraseña incorrecta', 'error');
+            }
+        }
+
+        function updateAdminVisibility() {
+            const navAdmin = document.getElementById('nav-admin');
+            const quickBtn = document.getElementById('admin-quick-btn');
+            const scoresCreateBtn = document.getElementById('scores-create-btn');
+            if (isAdminAuthenticated) {
+                navAdmin.classList.remove('hidden');
+                quickBtn.classList.remove('hidden');
+                quickBtn.classList.add('md:flex');
+                scoresCreateBtn.classList.remove('hidden');
+            } else {
+                navAdmin.classList.add('hidden');
+                quickBtn.classList.add('hidden');
+                quickBtn.classList.remove('md:flex');
+                scoresCreateBtn.classList.add('hidden');
+            }
+        }
+
+        function switchTab(tabId) {
+            if (tabId === 'admin' && !isAdminAuthenticated) {
+                requestAdminAccess();
+                return;
+            }
+            const readerView = document.getElementById('active-article-reader');
+            if (readerView) readerView.classList.add('hidden');
+
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            const videoSec = document.getElementById('section-presentation-video');
+            if (videoSec) {
+                if (tabId === 'home') {
+                    videoSec.classList.remove('hidden');
+                } else {
+                    videoSec.classList.add('hidden');
+                }
+            }
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('border-black', 'text-black');
+                btn.classList.add('border-transparent', 'text-neutral-600');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            if (activeBtn && tabId !== 'admin') {
+                activeBtn.classList.add('border-black', 'text-black');
+                activeBtn.classList.remove('border-transparent', 'text-neutral-600');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            renderAll();
+        }
+
+        function switchAdminSub(sub) {
+            const secNews = document.getElementById('admin-sec-news');
+            const secScores = document.getElementById('admin-sec-scores');
+            const btnNews = document.getElementById('admin-sub-news-btn');
+            const btnScores = document.getElementById('admin-sub-scores-btn');
+
+            if (sub === 'news') {
+                secNews.classList.remove('hidden');
+                secScores.classList.add('hidden');
+                btnNews.className = "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all bg-black text-white";
+                btnScores.className = "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all bg-neutral-100 text-neutral-700 hover:bg-neutral-200";
+            } else {
+                secNews.classList.add('hidden');
+                secScores.classList.remove('hidden');
+                btnScores.className = "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all bg-black text-white";
+                btnNews.className = "px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all bg-neutral-100 text-neutral-700 hover:bg-neutral-200";
+            }
+        }
+
+        function renderAll() {
+            updateStats();
+            renderHomeLead();
+            renderHomeSecondary();
+            renderNews();
+            renderScores();
+            renderAdminLists();
+        }
+
+        function updateStats() {
+            document.getElementById('admin-news-count').textContent = newsList.length;
+            document.getElementById('admin-scores-count').textContent = scoresList.length;
+        }
+
+        function stripHtml(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        }
+
+        function renderHomeLead() {
+            const container = document.getElementById('lead-article-container');
+            if (newsList.length === 0) {
+                container.innerHTML = `<p class="text-neutral-500 italic col-span-3">No hay noticias publicadas en portada.</p>`;
+                return;
+            }
+
+            const lead = newsList[0];
+            container.innerHTML = `
+                <div class="lg:col-span-2 space-y-4 pr-0 lg:pr-6 lg:border-r border-news-border flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <span class="text-xs uppercase font-bold tracking-widest text-news-accent bg-news-accent/10 px-2.5 py-1 rounded">
+                            ${lead.category} · Noticia Principal
+                        </span>
+                        <h2 onclick="openReader('${lead.id}')" class="font-headline text-3xl sm:text-4xl font-black text-neutral-900 cursor-pointer hover:underline leading-tight">
+                            ${lead.title}
+                        </h2>
+                        <p class="font-headline text-sm sm:text-base font-bold text-neutral-700 italic border-l-2 border-news-accent pl-3">${lead.subtitle}</p>
+                        <p class="text-neutral-700 text-sm sm:text-base leading-relaxed line-clamp-4">${stripHtml(lead.content)}</p>
+                    </div>
+                    <div class="flex items-center justify-between pt-4 border-t border-news-border text-xs text-news-muted">
+                        <span><i class="fa-solid fa-user mr-1 text-black"></i> ${lead.author} &bull; ${lead.date}</span>
+                        <button onclick="openReader('${lead.id}')" class="font-bold uppercase tracking-wider text-black hover:underline">
+                            Leer crónica completa <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="space-y-4 flex flex-col justify-between">
+                    <div class="rounded-lg overflow-hidden h-64 bg-neutral-100 border border-news-border cursor-pointer" onclick="openReader('${lead.id}')">
+                        <img src="${lead.image || 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80'}" alt="${lead.title}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x400/e5e5e5/111111?text=Sports+Ca+Nostra'">
+                    </div>
+                    <div class="bg-neutral-50 border border-news-border p-4 rounded-lg space-y-2">
+                        <h4 class="font-headline font-bold text-sm uppercase tracking-wider">Marcador Destacado</h4>
+                        ${scoresList.length > 0 ? `
+                            <div class="flex items-center justify-between text-xs font-bold">
+                                <span>${scoresList[0].homeTeam}</span>
+                                <span class="font-mono text-sm bg-black text-white px-2.5 py-0.5 rounded">${scoresList[0].homeGoals} - ${scoresList[0].awayGoals}</span>
+                                <span>${scoresList[0].awayTeam}</span>
+                            </div>
+                        ` : '<span class="text-xs text-neutral-500">Sin marcadores recientes</span>'}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderHomeSecondary() {
+            const container = document.getElementById('home-secondary-grid');
+            const secondary = newsList.slice(1, 4);
+            if (secondary.length === 0) {
+                container.innerHTML = `<p class="text-neutral-500 italic text-sm col-span-3">No hay más artículos recientes.</p>`;
+                return;
+            }
+
+            container.innerHTML = secondary.map(item => `
+                <div onclick="openReader('${item.id}')" class="bg-white border border-news-border p-5 rounded-xl flex flex-col justify-between space-y-4 hover:border-black transition-all cursor-pointer">
+                    <div class="space-y-2">
+                        <span class="text-[11px] uppercase font-bold tracking-wider text-news-muted">${item.category} &bull; ${item.date}</span>
+                        <h4 class="font-headline text-lg font-bold text-neutral-900 line-clamp-2">${item.title}</h4>
+                        <p class="font-headline text-xs font-bold text-neutral-700 italic line-clamp-1">${item.subtitle || ''}</p>
+                        <p class="text-xs text-neutral-600 line-clamp-2">${stripHtml(item.content)}</p>
+                    </div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-black hover:underline pt-2 border-t border-news-border w-full block">
+                        Leer artículo <i class="fa-solid fa-arrow-right ml-1"></i>
+                    </span>
+                </div>
+            `).join('');
+        }
+
+        function renderNews() {
+            const search = document.getElementById('news-search').value.toLowerCase();
+            const cat = document.getElementById('news-cat-filter').value;
+            const container = document.getElementById('full-news-grid');
+
+            const filtered = newsList.filter(n => {
+                const matchText = n.title.toLowerCase().includes(search) || stripHtml(n.content).toLowerCase().includes(search);
+                const matchCat = cat === 'Todas' || n.category === cat;
+                return matchText && matchCat;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-12 text-center text-neutral-500 italic">No se han encontrado noticias.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => `
+                <div class="bg-white border border-news-border rounded-xl overflow-hidden flex flex-col justify-between shadow-xs hover:shadow-md transition-all">
+                    <div onclick="openReader('${item.id}')" class="h-44 bg-neutral-100 overflow-hidden border-b border-news-border cursor-pointer">
+                        <img src="${item.image || 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80'}" alt="${item.title}" class="w-full h-full object-cover hover:scale-105 transition-transform duration-300" onerror="this.src='https://placehold.co/600x400/e5e5e5/111111?text=Sports+Ca+Nostra'">
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow justify-between space-y-3">
+                        <div class="space-y-2">
+                            <span class="text-[11px] font-bold uppercase tracking-wider text-news-accent">${item.category}</span>
+                            <h3 onclick="openReader('${item.id}')" class="font-headline text-base font-bold text-neutral-900 cursor-pointer hover:underline line-clamp-2">${item.title}</h3>
+                            <p class="font-headline text-xs font-bold text-neutral-700 italic line-clamp-1">${item.subtitle || ''}</p>
+                            <p class="text-xs text-neutral-600 line-clamp-3">${stripHtml(item.content)}</p>
+                        </div>
+                        <div class="pt-3 border-t border-news-border flex items-center justify-between text-xs">
+                            <button onclick="openReader('${item.id}')" class="font-bold uppercase tracking-wider text-black hover:underline">
+                                Leer más <i class="fa-solid fa-arrow-right ml-1"></i>
+                            </button>
+                            ${isAdminAuthenticated ? `
+                                <div class="flex items-center gap-2">
+                                    <button onclick="editNews('${item.id}')" class="p-2 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700" title="Editar"><i class="fa-solid fa-pen"></i></button>
+                                    <button onclick="requestDeleteNews('${item.id}')" class="p-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-700" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderScores() {
+            const container = document.getElementById('full-scores-grid');
+            if (scoresList.length === 0) {
+                container.innerHTML = `<div class="col-span-full py-12 text-center text-neutral-500 italic">No hay resultados registrados.</div>`;
+                return;
+            }
+
+            container.innerHTML = scoresList.map(s => `
+                <div class="bg-white border border-news-border rounded-xl p-5 space-y-4 shadow-xs">
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-bold uppercase tracking-wider text-news-muted">${s.sport}</span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${s.status === 'En Directo' ? 'bg-red-100 text-red-800 animate-pulse' : 'bg-neutral-100 text-neutral-800'}">
+                            ${s.status}
+                        </span>
+                    </div>
+                    <div class="flex items-center justify-between py-2">
+                        <span class="font-bold text-sm truncate w-5/12">${s.homeTeam}</span>
+                        <div class="bg-black text-white px-3 py-1 rounded-lg font-mono font-bold tracking-widest text-base">
+                            ${s.homeGoals} - ${s.awayGoals}
+                        </div>
+                        <span class="font-bold text-sm truncate w-5/12 text-right">${s.awayTeam}</span>
+                    </div>
+                    ${isAdminAuthenticated ? `
+                        <div class="pt-3 border-t border-news-border flex justify-end gap-2 text-xs">
+                            <button onclick="editScore('${s.id}')" class="px-3 py-1.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 font-bold uppercase tracking-wider text-neutral-700"><i class="fa-solid fa-pen mr-1"></i> Editar</button>
+                            <button onclick="requestDeleteScore('${s.id}')" class="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 font-bold uppercase tracking-wider text-red-700"><i class="fa-solid fa-trash mr-1"></i> Borrar</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function renderAdminLists() {
+            const nContainer = document.getElementById('admin-news-list');
+            if (newsList.length === 0) {
+                nContainer.innerHTML = `<p class="text-neutral-500 text-xs italic">Sin noticias.</p>`;
+            } else {
+                nContainer.innerHTML = newsList.map(n => `
+                    <div class="bg-neutral-50 border border-news-border p-3.5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="min-w-0 flex-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-news-accent">${n.category}</span>
+                            <h4 class="text-sm font-bold text-neutral-900 truncate">${n.title}</h4>
+                            <p class="text-xs text-neutral-600 font-semibold italic truncate">${n.subtitle}</p>
+                            <span class="text-[11px] text-neutral-500">${n.date} · Por ${n.author}</span>
+                        </div>
+                        <div class="flex items-center gap-2 self-end sm:self-center">
+                            <button onclick="editNews('${n.id}')" class="px-3 py-1.5 rounded-lg bg-black text-white text-xs font-bold uppercase tracking-wider hover:bg-neutral-800"><i class="fa-solid fa-pen mr-1"></i> Editar</button>
+                            <button onclick="requestDeleteNews('${n.id}')" class="px-3 py-1.5 rounded-lg bg-red-100 text-red-800 text-xs font-bold uppercase tracking-wider hover:bg-red-200"><i class="fa-solid fa-trash mr-1"></i> Borrar</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const sContainer = document.getElementById('admin-scores-list');
+            if (scoresList.length === 0) {
+                sContainer.innerHTML = `<p class="text-neutral-500 text-xs italic">Sin resultados.</p>`;
+            } else {
+                sContainer.innerHTML = scoresList.map(s => `
+                    <div class="bg-neutral-50 border border-news-border p-3.5 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="min-w-0 flex-1">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-news-muted">${s.sport}</span>
+                            <h4 class="text-sm font-bold text-neutral-900 truncate">${s.homeTeam} <span class="font-mono text-black">${s.homeGoals} - ${s.awayGoals}</span> ${s.awayTeam}</h4>
+                            <span class="text-[11px] text-neutral-500">Estado: ${s.status}</span>
+                        </div>
+                        <div class="flex items-center gap-2 self-end sm:self-center">
+                            <button onclick="editScore('${s.id}')" class="px-3 py-1.5 rounded-lg bg-black text-white text-xs font-bold uppercase tracking-wider hover:bg-neutral-800"><i class="fa-solid fa-pen mr-1"></i> Editar</button>
+                            <button onclick="requestDeleteScore('${s.id}')" class="px-3 py-1.5 rounded-lg bg-red-100 text-red-800 text-xs font-bold uppercase tracking-wider hover:bg-red-200"><i class="fa-solid fa-trash mr-1"></i> Borrar</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function openCreateModal(type = 'news') {
+            document.getElementById('news-edit-id').value = '';
+            document.getElementById('score-edit-id').value = '';
+            document.getElementById('modal-form-news').reset();
+            document.getElementById('modal-form-score').reset();
+            document.getElementById('news-submit-btn').textContent = 'Guardar Noticia';
+            document.getElementById('score-submit-btn').textContent = 'Guardar Resultado';
+            document.getElementById('modal-heading').textContent = 'Añadir Nuevo Contenido';
+
+            setModalType(type);
+            const modal = document.getElementById('content-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('content-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function setModalType(type) {
+            const fNews = document.getElementById('modal-form-news');
+            const fScore = document.getElementById('modal-form-score');
+            const btnNews = document.getElementById('sel-type-news');
+            const btnScore = document.getElementById('sel-type-score');
+
+            if (type === 'news') {
+                fNews.classList.remove('hidden');
+                fScore.classList.add('hidden');
+                btnNews.className = "py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all bg-black text-white shadow-xs";
+                btnScore.className = "py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all text-neutral-600 hover:text-black";
+            } else {
+                fNews.classList.add('hidden');
+                fScore.classList.remove('hidden');
+                btnScore.className = "py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all bg-black text-white shadow-xs";
+                btnNews.className = "py-2 rounded-md text-xs font-bold uppercase tracking-wider transition-all text-neutral-600 hover:text-black";
+            }
+        }
+
+        function submitNewsForm(e) {
+            e.preventDefault();
+            const id = document.getElementById('news-edit-id').value;
+            const title = document.getElementById('f-news-title').value;
+            const subtitle = document.getElementById('f-news-subtitle').value;
+            const category = document.getElementById('f-news-category').value;
+            const author = document.getElementById('f-news-author').value;
+            const image = document.getElementById('f-news-image').value;
+            const content = document.getElementById('f-news-content').value;
+            const dateStr = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+            if (id) {
+                const idx = newsList.findIndex(n => n.id === id);
+                if (idx !== -1) {
+                    newsList[idx] = { ...newsList[idx], title, subtitle, category, author, image, content };
+                    showToast('¡Noticia actualizada correctamente!');
+                }
+            } else {
+                const newItem = { id: 'n_' + Date.now(), title, subtitle, category, author, date: dateStr, image, content };
+                newsList.unshift(newItem);
+                showToast('¡Noticia publicada con éxito!');
+            }
+
+            persistData();
+            closeModal();
+            renderAll();
+        }
+
+        function editNews(id) {
+            const item = newsList.find(n => n.id === id);
+            if (!item) return;
+
+            openCreateModal('news');
+            document.getElementById('news-edit-id').value = item.id;
+            document.getElementById('f-news-title').value = item.title;
+            document.getElementById('f-news-subtitle').value = item.subtitle || '';
+            document.getElementById('f-news-category').value = item.category;
+            document.getElementById('f-news-author').value = item.author;
+            document.getElementById('f-news-image').value = item.image || '';
+            document.getElementById('f-news-content').value = item.content;
+            document.getElementById('news-submit-btn').textContent = 'Actualizar Noticia';
+            document.getElementById('modal-heading').textContent = 'Editar Noticia';
+        }
+
+        function requestDeleteNews(id) {
+            openConfirmModal('¿Estás seguro de que deseas eliminar esta noticia de forma permanente?', () => {
+                newsList = newsList.filter(n => n.id !== id);
+                persistData();
+                renderAll();
+                showToast('Noticia eliminada.', 'error');
+            });
+        }
+
+        function submitScoreForm(e) {
+            e.preventDefault();
+            const id = document.getElementById('score-edit-id').value;
+            const sport = document.getElementById('f-score-sport').value;
+            const homeTeam = document.getElementById('f-score-home').value;
+            const awayTeam = document.getElementById('f-score-away').value;
+            const homeGoals = parseInt(document.getElementById('f-score-homegoals').value);
+            const awayGoals = parseInt(document.getElementById('f-score-awaygoals').value);
+            const status = document.getElementById('f-score-status').value;
+
+            if (id) {
+                const idx = scoresList.findIndex(s => s.id === id);
+                if (idx !== -1) {
+                    scoresList[idx] = { ...scoresList[idx], sport, homeTeam, awayTeam, homeGoals, awayGoals, status };
+                    showToast('¡Resultado actualizado correctamente!');
+                }
+            } else {
+                const newScore = { id: 's_' + Date.now(), sport, homeTeam, awayTeam, homeGoals, awayGoals, status };
+                scoresList.unshift(newScore);
+                showToast('¡Resultado registrado con éxito!');
+            }
+
+            persistData();
+            closeModal();
+            renderAll();
+        }
+
+        function editScore(id) {
+            const item = scoresList.find(s => s.id === id);
+            if (!item) return;
+
+            openCreateModal('score');
+            document.getElementById('score-edit-id').value = item.id;
+            document.getElementById('f-score-sport').value = item.sport;
+            document.getElementById('f-score-home').value = item.homeTeam;
+            document.getElementById('f-score-away').value = item.awayTeam;
+            document.getElementById('f-score-homegoals').value = item.homeGoals;
+            document.getElementById('f-score-awaygoals').value = item.awayGoals;
+            document.getElementById('f-score-status').value = item.status;
+            document.getElementById('score-submit-btn').textContent = 'Actualizar Resultado';
+            document.getElementById('modal-heading').textContent = 'Editar Resultado';
+        }
+
+        function requestDeleteScore(id) {
+            openConfirmModal('¿Estás seguro de que deseas eliminar este resultado de forma permanente?', () => {
+                scoresList = scoresList.filter(s => s.id !== id);
+                persistData();
+                renderAll();
+                showToast('Resultado eliminado.', 'error');
+            });
+        }
+
+        function openReader(id) {
+            const item = newsList.find(n => n.id === id);
+            if (!item) return;
+
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            const videoSec = document.getElementById('section-presentation-video');
+            if (videoSec) videoSec.classList.add('hidden');
+
+            let readerView = document.getElementById('active-article-reader');
+            if (!readerView) {
+                readerView = document.createElement('section');
+                readerView.id = 'active-article-reader';
+                readerView.className = 'bg-white border border-news-border p-6 sm:p-12 rounded-xl shadow-sm space-y-6 max-w-4xl mx-auto my-4';
+                document.querySelector('main').appendChild(readerView);
+            }
+            readerView.classList.remove('hidden');
+
+            readerView.innerHTML = `
+                <div class="flex items-center justify-between pb-4 border-b border-news-border">
+                    <button onclick="closeReader()" class="bg-black hover:bg-neutral-800 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i> Volver a la portada
+                    </button>
+                    <span class="text-xs uppercase font-bold text-news-accent tracking-widest bg-news-accent/10 px-3 py-1 rounded">${item.category}</span>
+                </div>
+                <div class="space-y-4">
+                    <h1 class="font-headline text-3xl sm:text-5xl font-black text-neutral-900 leading-tight">${item.title}</h1>
+                    <p class="font-headline text-lg sm:text-xl font-bold text-neutral-700 italic border-l-4 border-news-accent pl-4">${item.subtitle || ''}</p>
+                    <div class="flex flex-wrap items-center gap-6 text-xs text-news-muted py-3 border-y border-news-border">
+                        <span><i class="fa-solid fa-user mr-1.5 text-black"></i> Por <strong>${item.author}</strong></span>
+                        <span><i class="fa-solid fa-calendar mr-1.5 text-black"></i> ${item.date}</span>
+                    </div>
+                </div>
+                ${item.image ? `
+                    <div class="rounded-xl overflow-hidden max-h-[500px] bg-neutral-100 border border-news-border my-6">
+                        <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/800x500/e5e5e5/111111?text=Sports+Ca+Nostra'">
+                    </div>
+                ` : ''}
+                <div class="text-neutral-900 text-base sm:text-lg leading-relaxed whitespace-pre-line space-y-4 pt-4 font-serif">
+                    ${item.content}
+                </div>
+                <div class="pt-8 border-t border-news-border flex flex-col sm:flex-row gap-4 justify-between items-center">
+                    <button onclick="closeReader()" class="bg-neutral-100 hover:bg-neutral-200 text-neutral-900 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all">
+                        <i class="fa-solid fa-arrow-left mr-1"></i> Volver
+                    </button>
+                    <span class="text-xs text-news-muted font-mono">Sports de ca nostra &bull; sportsdecanostra@gmail.com</span>
+                </div>
+            `;
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function closeReader() {
+            const readerView = document.getElementById('active-article-reader');
+            if (readerView) {
+                readerView.classList.add('hidden');
+            }
+            switchTab('home');
+        }
+
+        function openAboutModal() {
+            const m = document.getElementById('about-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeAboutModal() {
+            const m = document.getElementById('about-modal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        window.onload = function() {
+            if (VIDEO_EMBED_URL) {
+                const wrapper = document.getElementById('video-wrapper');
+                wrapper.innerHTML = `<iframe src="${VIDEO_EMBED_URL}" class="w-full h-full border-0" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+            }
+            updateAdminVisibility();
+            renderAll();
+        }
+    </script>
+</body>
+</html>
